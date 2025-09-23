@@ -1,7 +1,7 @@
 # OpsGuardian™ Command Center X (CCX)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Salesforce API](https://img.shields.io/badge/API-62.0+-blue.svg)](#-status--compatibility)
+[![Salesforce API](https://img.shields.io/badge/API-62.0+-blue.svg)](#status--compatibility)
 [![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-yellow.svg)](.github/workflows)
 
 **A Salesforce-Native Compliance, Security, and AI Monitoring Framework**  
@@ -9,9 +9,9 @@ Built for regulated industries, government, and enterprises that demand governan
 
 ---
 
-## 🚦 Status & Compatibility
+## Status & Compatibility
 
-- **Status:** ✅ Production-ready (AppExchange submission in progress)  
+- **Status:** Production-ready (AppExchange submission in progress)  
 - **Version:** 1.0.0  
 - **API Version:** Salesforce 62.0+  
 - **Supported Orgs:** Scratch, Sandbox, Developer Edition, Production  
@@ -19,33 +19,33 @@ Built for regulated industries, government, and enterprises that demand governan
 
 ---
 
-## ✨ Features
+## Features
 
-- **Governor Limits Dashboard** – Real-time CPU, SOQL, DML, and heap tracking  
-- **Flow & Transaction Monitor** – Surfacing faulting Flows and heavy transactions  
-- **AI Diagnostics Tile** – GPT + Einstein hybrid anomaly detection and scoring  
-- **Predictive Alerts** – Proactive risk scores via Platform Events  
-- **Policy-as-Code** – Custom Metadata (`OG_Policy__mdt`) for configurable thresholds  
-- **Remediation Automation** – Flow Invocables to auto-rollback or create Jira/Slack tickets  
-- **Multi-Org Hub-and-Spoke** – Secure Apex REST endpoint for cross-org telemetry  
-- **CI/CD Ready** – Jest tests, GitHub Actions pipelines, PMD + sf-scanner integrated  
+- Governor Limits Dashboard – Real-time CPU, SOQL, DML, and heap tracking  
+- Flow & Transaction Monitor – Surfacing faulting Flows and heavy transactions  
+- AI Diagnostics Tile – GPT + Einstein hybrid anomaly detection and scoring  
+- Predictive Alerts – Proactive risk scores via Platform Events  
+- Policy-as-Code – Custom Metadata (`OG_Policy__mdt`) for configurable thresholds  
+- Remediation Automation – Flow Invocables to auto-rollback or create Jira/Slack tickets  
+- Multi-Org Hub-and-Spoke – Secure Apex REST endpoint for cross-org telemetry  
+- CI/CD Ready – Jest tests, GitHub Actions pipelines, PMD + sf-scanner integrated  
 
 ---
 
-## 🔒 Architecture & Security
+## Architecture & Security
 
-- **Managed Package (2GP)** structure for AppExchange readiness  
-- **Permissions:** `OpsGuardian_Admin` with least-privilege model  
-- **Security Enforcement:**  
+- Managed Package (2GP) structure for AppExchange readiness  
+- Permissions: `OpsGuardian_Admin` with least-privilege model  
+- Security Enforcement:  
   - `WITH SECURITY_ENFORCED` in all SOQL queries  
   - `Security.stripInaccessible()` on all DML operations  
-- **Authentication:** OAuth 2.0 (JWT / Client Credentials) in Named Credentials; TLS 1.3 required  
-- **Resilience:** Queueable + Batch Apex, circuit breaker patterns, retry/backoff for callouts  
-- **Accessibility & i18n:** LWCs with ARIA labels, text externalized to Custom Labels  
+- Authentication: OAuth 2.0 (JWT / Client Credentials) in Named Credentials; TLS 1.3 required  
+- Resilience: Queueable + Batch Apex, circuit breaker patterns, retry/backoff for callouts  
+- Accessibility & i18n: LWCs with ARIA labels, text externalized to Custom Labels  
 
 ---
 
-## ⚡ Installation
+## Installation
 
 ### Scratch Org (Developer Testing)
 ```bash
@@ -74,7 +74,7 @@ Production (AppExchange)
 
 ⸻
 
-🔄 Upgrade Notes
+Upgrade Notes
 	•	CMDT Records: Preserved across upgrades.
 	•	Custom Objects: OpsGuardian_History__c data retained.
 	•	Permission Sets: Updated automatically; review after upgrade.
@@ -82,7 +82,7 @@ Production (AppExchange)
 
 ⸻
 
-✅ Post-Install Checklist
+Post-Install Checklist
 
 Step	Description
 Upload Chart.js static resource	Required for dashboard charts
@@ -95,7 +95,7 @@ Test AI Diagnostics Tile	Validate OpenAI + Einstein integration
 
 ⸻
 
-📸 Screenshots & Architecture
+Screenshots & Architecture
 
 Command Center Dashboard
 
@@ -126,14 +126,14 @@ flowchart TD
 
 ⸻
 
-🛣️ Roadmap
+Roadmap
 	•	v1.0: AppExchange package, pilot deployments
 	•	v1.1: Slack/Jira plugins, enhanced dashboards, i18n improvements
 	•	v2.0: Multi-cloud ingestion + standalone SaaS dashboard
 
 ⸻
 
-🧪 Running Tests
+Running Tests
 
 Apex Unit Tests
 
@@ -149,7 +149,7 @@ npm test
 
 ⸻
 
-📊 Demo Data
+Demo Data
 
 Import demo records to see dashboards in action:
 
@@ -165,7 +165,7 @@ Files included:
 
 ⸻
 
-🔄 CI/CD Example
+CI/CD Example
 
 Minimal GitHub Actions workflow (.github/workflows/deploy.yml):
 
@@ -192,7 +192,7 @@ jobs:
 
 ⸻
 
-🛡️ Compliance Readiness
+Compliance Readiness
 	•	95%+ Apex coverage target
 	•	Jest tests for LWCs
 	•	PMD + sf-scanner static analysis
@@ -201,7 +201,7 @@ jobs:
 
 ⸻
 
-🤝 Contributing
+Contributing
 
 We welcome contributions:
 	•	Fork repo & branch from main
@@ -210,7 +210,7 @@ We welcome contributions:
 
 ⸻
 
-📜 License & Support
+License & Support
 	•	Licensed under MIT
 	•	Maintainer: OpsGuardian Dev Team
 	•	Email: security@opsguardian.dev
@@ -218,7 +218,7 @@ We welcome contributions:
 
 ⸻
 
-📚 Appendix
+Appendix
 
 Dependencies
 	•	Salesforce CLI (sfdx) v7+
@@ -237,3 +237,7 @@ Compliance Artifacts
 	•	/docs/compliance/encryption.md – Shield/TLS details
 	•	/docs/compliance/incident-response.md – Triage & escalation policy
 	•	/docs/compliance/deletion-policy.md – Data deletion procedures
+
+---
+
+=
