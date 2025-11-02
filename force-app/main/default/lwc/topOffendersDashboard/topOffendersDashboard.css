@@ -1,0 +1,21 @@
+.offender-card {
+  border-left: 4px solid #0070d2;
+  transition: all 0.2s ease;
+}
+
+.offender-card:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.slds-text-color_error {
+  color: #c23934;
+}
+
+.slds-text-color_warning {
+  color: #ffb75d;
+}
+
+.slds-text-color_success {
+  color: #2e844a;
+}
