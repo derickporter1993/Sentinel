@@ -25,10 +25,7 @@ export default class TopOffendersDashboard extends LightningElement {
       });
     } catch (error) {
       this.error = error;
-      this.showError(
-        "Failed to load top offenders",
-        error.body?.message || error.message
-      );
+      this.showError("Failed to load top offenders", error.body?.message || error.message);
     } finally {
       this.isLoading = false;
     }

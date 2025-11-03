@@ -15,16 +15,19 @@ ESLint v8 will remain in maintenance mode until October 2024, providing security
 ## Development Setup
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Run linting:
+
    ```bash
    npm run lint
    ```
 
 3. Format code:
+
    ```bash
    npm run fmt
    ```

@@ -4,14 +4,14 @@
       <lightning-button
         label="Refresh"
         icon-name="utility:refresh"
-        onclick={handleRefresh}
-        disabled={isLoading}
+        onclick="{handleRefresh}"
+        disabled="{isLoading}"
       ></lightning-button>
     </div>
 
     <div class="slds-p-around_medium">
       <!-- Loading Spinner -->
-      <template if:true={isLoading}>
+      <template if:true="{isLoading}">
         <lightning-spinner
           alternative-text="Loading top offenders..."
           size="medium"
@@ -19,26 +19,26 @@
       </template>
 
       <!-- Error State -->
-      <template if:true={error}>
+      <template if:true="{error}">
         <div class="slds-text-color_error slds-p-around_small">
           <p>Error loading data. Please try again.</p>
         </div>
       </template>
 
       <!-- Main Content -->
-      <template if:false={isLoading}>
+      <template if:false="{isLoading}">
         <div class="slds-text-body_small slds-m-bottom_small">
           Last updated: {lastUpdatedFormatted}
         </div>
 
         <!-- Slowest Flows Section -->
-        <template if:true={hasSlowFlows}>
+        <template if:true="{hasSlowFlows}">
           <div class="slds-m-bottom_large">
             <h3 class="slds-text-heading_small slds-m-bottom_small">
               ⚡ Slowest Flows (Avg CPU Time)
             </h3>
-            <template for:each={topOffendersData.slowestFlows} for:item="flow">
-              <div key={flow.name} class="offender-card slds-box slds-m-bottom_small">
+            <template for:each="{topOffendersData.slowestFlows}" for:item="flow">
+              <div key="{flow.name}" class="offender-card slds-box slds-m-bottom_small">
                 <div class="slds-grid slds-grid_vertical-align-center">
                   <div class="slds-col slds-size_2-of-3">
                     <div class="slds-text-heading_small">{flow.name}</div>
@@ -47,15 +47,13 @@
                     </div>
                   </div>
                   <div class="slds-col slds-size_1-of-3 slds-text-align_right">
-                    <div class={flow.severityClass}>
+                    <div class="{flow.severityClass}">
                       <div class="slds-text-heading_medium">{flow.avgValue}ms</div>
-                      <div class="slds-text-body_small">
-                        {flow.percentOfLimit}% of limit
-                      </div>
+                      <div class="slds-text-body_small">{flow.percentOfLimit}% of limit</div>
                     </div>
-                    <div class={flow.trendClass}>
+                    <div class="{flow.trendClass}">
                       <lightning-icon
-                        icon-name={flow.trendIcon}
+                        icon-name="{flow.trendIcon}"
                         size="x-small"
                         class="slds-m-right_xx-small"
                       ></lightning-icon>
@@ -64,8 +62,8 @@
                   </div>
                 </div>
                 <lightning-progress-bar
-                  value={flow.percentOfLimit}
-                  variant={flow.severity}
+                  value="{flow.percentOfLimit}"
+                  variant="{flow.severity}"
                   class="slds-m-top_small"
                 ></lightning-progress-bar>
               </div>
@@ -74,16 +72,11 @@
         </template>
 
         <!-- High CPU Classes Section -->
-        <template if:true={hasHighCpuClasses}>
+        <template if:true="{hasHighCpuClasses}">
           <div class="slds-m-bottom_large">
-            <h3 class="slds-text-heading_small slds-m-bottom_small">
-              🔴 High CPU Alert Sources
-            </h3>
-            <template
-              for:each={topOffendersData.highestCpuClasses}
-              for:item="cpuClass"
-            >
-              <div key={cpuClass.name} class="offender-card slds-box slds-m-bottom_small">
+            <h3 class="slds-text-heading_small slds-m-bottom_small">🔴 High CPU Alert Sources</h3>
+            <template for:each="{topOffendersData.highestCpuClasses}" for:item="cpuClass">
+              <div key="{cpuClass.name}" class="offender-card slds-box slds-m-bottom_small">
                 <div class="slds-grid slds-grid_vertical-align-center">
                   <div class="slds-col slds-size_2-of-3">
                     <div class="slds-text-heading_small">{cpuClass.name}</div>
@@ -92,17 +85,15 @@
                     </div>
                   </div>
                   <div class="slds-col slds-size_1-of-3 slds-text-align_right">
-                    <div class={cpuClass.severityClass}>
+                    <div class="{cpuClass.severityClass}">
                       <div class="slds-text-heading_medium">{cpuClass.avgValue}ms</div>
-                      <div class="slds-text-body_small">
-                        {cpuClass.percentOfLimit}% of limit
-                      </div>
+                      <div class="slds-text-body_small">{cpuClass.percentOfLimit}% of limit</div>
                     </div>
                   </div>
                 </div>
                 <lightning-progress-bar
-                  value={cpuClass.percentOfLimit}
-                  variant={cpuClass.severity}
+                  value="{cpuClass.percentOfLimit}"
+                  variant="{cpuClass.severity}"
                   class="slds-m-top_small"
                 ></lightning-progress-bar>
               </div>
@@ -111,13 +102,11 @@
         </template>
 
         <!-- API Consumers Section -->
-        <template if:true={hasApiConsumers}>
+        <template if:true="{hasApiConsumers}">
           <div class="slds-m-bottom_large">
-            <h3 class="slds-text-heading_small slds-m-bottom_small">
-              📊 API Usage Trends
-            </h3>
-            <template for:each={topOffendersData.mostApiConsumers} for:item="api">
-              <div key={api.name} class="offender-card slds-box slds-m-bottom_small">
+            <h3 class="slds-text-heading_small slds-m-bottom_small">📊 API Usage Trends</h3>
+            <template for:each="{topOffendersData.mostApiConsumers}" for:item="api">
+              <div key="{api.name}" class="offender-card slds-box slds-m-bottom_small">
                 <div class="slds-grid slds-grid_vertical-align-center">
                   <div class="slds-col slds-size_2-of-3">
                     <div class="slds-text-heading_small">{api.name}</div>
@@ -126,13 +115,13 @@
                     </div>
                   </div>
                   <div class="slds-col slds-size_1-of-3 slds-text-align_right">
-                    <div class={api.severityClass}>
+                    <div class="{api.severityClass}">
                       <div class="slds-text-heading_medium">{api.avgValue}</div>
                       <div class="slds-text-body_small">{api.percentOfLimit}% used</div>
                     </div>
-                    <div class={api.trendClass}>
+                    <div class="{api.trendClass}">
                       <lightning-icon
-                        icon-name={api.trendIcon}
+                        icon-name="{api.trendIcon}"
                         size="x-small"
                         class="slds-m-right_xx-small"
                       ></lightning-icon>
@@ -141,8 +130,8 @@
                   </div>
                 </div>
                 <lightning-progress-bar
-                  value={api.percentOfLimit}
-                  variant={api.severity}
+                  value="{api.percentOfLimit}"
+                  variant="{api.severity}"
                   class="slds-m-top_small"
                 ></lightning-progress-bar>
               </div>
@@ -152,9 +141,9 @@
 
         <!-- Empty State -->
         <template
-          if:false={hasSlowFlows}
-          if:false={hasHighCpuClasses}
-          if:false={hasApiConsumers}
+          if:false="{hasSlowFlows}"
+          if:false="{hasHighCpuClasses}"
+          if:false="{hasApiConsumers}"
         >
           <div class="slds-text-align_center slds-p-around_large">
             <p class="slds-text-body_regular">
