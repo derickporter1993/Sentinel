@@ -24,6 +24,13 @@ export class PollingManager {
     }
   }
 
+  updateInterval(newInterval) {
+    this.interval = newInterval;
+    // Restart polling with new interval
+    this.stop();
+    this.start();
+  }
+
   handleVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
       this.start();
@@ -34,7 +41,7 @@ export class PollingManager {
   };
 
   setupVisibilityHandling() {
-    this.visibilityHandler = this.handleVisibilityChange.bind(this);
+    this.visibilityHandler = this.handleVisibilityChange;
     document.addEventListener('visibilitychange', this.visibilityHandler);
   }
 

@@ -45,11 +45,7 @@ export default class ApiUsageDashboard extends LightningElement {
       if (this.errorBackoffMultiplier > 1) {
         this.errorBackoffMultiplier = 1;
         this.currentInterval = this.pollInterval;
-        // Restart timer with normal interval
-        this.pollingManager.cleanup();
-        this.pollingManager = new PollingManager(() => this.load(), this.currentInterval);
-        this.pollingManager.start();
-        this.pollingManager.setupVisibilityHandling();
+        this.pollingManager.updateInterval(this.currentInterval);
       }
     } catch (e) {
       /* eslint-disable no-console */
@@ -60,11 +56,7 @@ export default class ApiUsageDashboard extends LightningElement {
       if (this.errorBackoffMultiplier < this.maxBackoffMultiplier) {
         this.errorBackoffMultiplier *= 2;
         this.currentInterval = this.pollInterval * this.errorBackoffMultiplier;
-        // Restart timer with increased interval
-        this.pollingManager.cleanup();
-        this.pollingManager = new PollingManager(() => this.load(), this.currentInterval);
-        this.pollingManager.start();
-        this.pollingManager.setupVisibilityHandling();
+        this.pollingManager.updateInterval(this.currentInterval);
       }
     }
   }
