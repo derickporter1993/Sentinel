@@ -27,7 +27,7 @@ export default class PollingManager {
   }
 
   /**
-   * Stops and cleans up the polling timer
+   * Stops and cleans up the polling timer and removes visibility listener
    */
   cleanup() {
     if (this.timerId) {
@@ -35,6 +35,13 @@ export default class PollingManager {
       this.timerId = null;
     }
     this.isRunning = false;
+
+    // Remove visibility handler if it was set up
+    if (this.visibilityHandlerSetup && this.visibilityHandler) {
+      document.removeEventListener("visibilitychange", this.visibilityHandler);
+      this.visibilityHandlerSetup = false;
+      this.visibilityHandler = null;
+    }
   }
 
   /**
