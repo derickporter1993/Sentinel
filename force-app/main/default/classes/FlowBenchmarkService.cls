@@ -29,6 +29,15 @@ public with sharing class FlowBenchmarkService {
         public BenchmarkStats benchmarks;
     }
 
+    public class ExecutionWithRating {
+        @AuraEnabled
+        public Flow_Execution__c execution;
+        @AuraEnabled
+        public String rating;
+        @AuraEnabled
+        public Decimal percentileRank;
+    }
+
     /**
      * Calculate benchmark statistics for a specific Flow
      */
@@ -123,11 +132,19 @@ public with sharing class FlowBenchmarkService {
      * Get performance rating for recent executions of a Flow
      */
     @AuraEnabled(cacheable=true)
-    public static List<Map<String, Object>> getRecentExecutionsWithRatings(
+    public static List<ExecutionWithRating> getRecentExecutionsWithRatings(
         String flowName,
         Integer limitSize,
         Integer daysBack
     ) {
+        // Validate parameters
+        if (limitSize == null || limitSize < 1) {
+            limitSize = 10; // Default to 10 if invalid
+        }
+        if (daysBack == null || daysBack < 1) {
+            daysBack = 30; // Default to 30 days if invalid
+        }
+
         Datetime startDate = System.now().addDays(-Math.abs(daysBack));
         BenchmarkStats benchmarks = getFlowBenchmarks(flowName, daysBack);
 
@@ -144,22 +161,22 @@ public with sharing class FlowBenchmarkService {
             FROM Flow_Execution__c
             WHERE Flow_Name__c = :flowName AND CreatedDate >= :startDate
             ORDER BY CreatedDate DESC
-            LIMIT :Math.max(1, limitSize)
+            LIMIT :limitSize
         ];
 
-        List<Map<String, Object>> results = new List<Map<String, Object>>();
+        List<ExecutionWithRating> results = new List<ExecutionWithRating>();
 
         for (Flow_Execution__c exec : executions) {
-            Map<String, Object> record = new Map<String, Object>();
-            record.put('execution', exec);
+            ExecutionWithRating record = new ExecutionWithRating();
+            record.execution = exec;
 
-            if (benchmarks != null && exec.CPU__c != null) {
+            if (benchmarks != null && benchmarks.sampleSize > 0 && exec.CPU__c != null) {
                 String execRating = getRating(exec.CPU__c, benchmarks);
-                record.put('rating', execRating);
-                record.put('percentileRank', calculatePercentileRank(exec.CPU__c, flowName, startDate));
+                record.rating = execRating;
+                record.percentileRank = calculatePercentileRank(exec.CPU__c, flowName, startDate);
             } else {
-                record.put('rating', 'Unknown');
-                record.put('percentileRank', null);
+                record.rating = 'Unknown';
+                record.percentileRank = null;
             }
 
             results.add(record);

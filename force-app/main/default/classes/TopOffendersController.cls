@@ -37,6 +37,14 @@ public with sharing class TopOffendersController {
 
     @AuraEnabled(cacheable=true)
     public static TopOffendersData getTopOffenders(Integer limitSize, Integer daysBack) {
+        // Validate parameters
+        if (limitSize == null || limitSize < 1) {
+            limitSize = 5; // Default to 5 if invalid
+        }
+        if (daysBack == null || daysBack < 1) {
+            daysBack = 7; // Default to 7 days if invalid
+        }
+
         TopOffendersData data = new TopOffendersData();
         data.lastUpdated = System.now();
 
@@ -70,7 +78,7 @@ public with sharing class TopOffendersController {
                 AND CPU__c != NULL
             GROUP BY Flow_Name__c
             ORDER BY AVG(CPU__c) DESC
-            LIMIT :Math.max(1, limitSize)
+            LIMIT :limitSize
         ];
 
         for (AggregateResult ar : groupedResults) {
@@ -112,7 +120,7 @@ public with sharing class TopOffendersController {
                 AND Context_Record__c != NULL
             GROUP BY Context_Record__c
             ORDER BY AVG(Value__c) DESC
-            LIMIT :Math.max(1, limitSize)
+            LIMIT :limitSize
         ];
 
         for (AggregateResult ar : groupedResults) {
@@ -143,7 +151,7 @@ public with sharing class TopOffendersController {
             FROM API_Usage_Snapshot__c
             WHERE Taken_On__c >= :startDate
             ORDER BY Taken_On__c DESC
-            LIMIT :Math.max(1, limitSize * 2)
+            LIMIT :limitSize * 2
         ];
 
         if (!snapshots.isEmpty()) {
