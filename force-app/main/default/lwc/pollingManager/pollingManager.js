@@ -30,7 +30,7 @@ export default class PollingManager {
 
   /**
    * Updates the polling interval and restarts the timer if it was running.
-   * @param {number} newIntervalMs
+   * @param {number} newIntervalMs - New polling interval in milliseconds.
    */
   updateInterval(newIntervalMs) {
     this.intervalMs = newIntervalMs;
