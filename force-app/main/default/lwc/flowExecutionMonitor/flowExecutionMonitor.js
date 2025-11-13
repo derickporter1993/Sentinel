@@ -29,7 +29,7 @@ export default class FlowExecutionMonitor extends LightningElement {
     try {
       this.rows = await topFlows({ limitSize: 20 });
     } catch (e) {
-      /* eslint-disable no-console */
+      // eslint-disable-next-line no-console
       console.error(e);
     }
   }
