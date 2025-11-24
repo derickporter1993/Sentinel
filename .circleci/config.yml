@@ -1,0 +1,116 @@
+version: 2.1
+
+# Define reusable executors
+executors:
+  node-executor:
+    docker:
+      - image: cimg/node:20.11
+    resource_class: medium
+    working_directory: ~/project
+
+# Define reusable commands
+commands:
+  restore-dependencies:
+    description: "Restore cached dependencies"
+    steps:
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
+
+  save-dependencies:
+    description: "Save dependencies to cache"
+    steps:
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
+# Define jobs
+jobs:
+  install-dependencies:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore-dependencies
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save-dependencies
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - .
+
+  lint:
+    executor: node-executor
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Run ESLint
+          command: npm run lint
+
+  format-check:
+    executor: node-executor
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Check code formatting
+          command: npm run fmt:check
+
+  validate-salesforce:
+    docker:
+      - image: cimg/node:20.11
+    resource_class: medium
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Validate Salesforce metadata
+          command: |
+            echo "Salesforce metadata validation placeholder"
+            echo "To enable full validation, install Salesforce CLI:"
+            echo "npm install -g @salesforce/cli"
+
+# Define workflows
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - install-dependencies
+      - lint:
+          requires:
+            - install-dependencies
+      - format-check:
+          requires:
+            - install-dependencies
+      - validate-salesforce:
+          requires:
+            - install-dependencies
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+
+  # Optional: Nightly build workflow
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - install-dependencies
+      - lint:
+          requires:
+            - install-dependencies
+      - format-check:
+          requires:
+            - install-dependencies
