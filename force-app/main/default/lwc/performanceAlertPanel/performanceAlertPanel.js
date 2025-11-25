@@ -25,7 +25,8 @@ export default class PerformanceAlertPanel extends LightningElement {
     }));
     this.handleSubscribe();
     onError((error) => {
-      /* eslint-disable no-console */ console.error("EMP API error: ", error);
+      /* eslint-disable no-console */
+      console.error("EMP API error: ", error);
     });
   }
 

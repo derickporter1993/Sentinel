@@ -1,13 +1,11 @@
 import babelParser from "@babel/eslint-parser";
 import lwc from "@lwc/eslint-plugin-lwc";
-import eslintConfigPrettier from "eslint-config-prettier";
+import prettier from "eslint-config-prettier";
 
 export default [
   {
-    files: ["**/*.js"],
+    files: ["force-app/**/*.js"],
     languageOptions: {
-      ecmaVersion: 2021,
-      sourceType: "module",
       parser: babelParser,
       parserOptions: {
         requireConfigFile: false,
@@ -16,22 +14,40 @@ export default [
             plugins: ["classProperties", "decorators-legacy"],
           },
         },
+        ecmaVersion: 2021,
+        sourceType: "module",
       },
       globals: {
         console: "readonly",
         document: "readonly",
-        window: "readonly",
         setInterval: "readonly",
         clearInterval: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        Date: "readonly",
+        Math: "readonly",
       },
     },
     plugins: {
-      lwc: lwc,
+      lwc,
     },
     rules: {
+      // Standard JavaScript rules
       "no-console": "warn",
       "no-unused-vars": "warn",
+
+      // LWC specific rules
+      "lwc/consistent-component-name": "error",
+      "lwc/no-api-reassignments": "error",
+      "lwc/no-deprecated": "warn",
+      "lwc/no-document-query": "error",
+      "lwc/no-inner-html": "error",
+      "lwc/no-async-await": "off",
+      "lwc/no-leading-uppercase-api-name": "error",
+      "lwc/valid-api": "error",
+      "lwc/valid-track": "error",
+      "lwc/valid-wire": "error",
     },
   },
-  eslintConfigPrettier,
+  prettier,
 ];

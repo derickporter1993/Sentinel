@@ -1,5 +1,6 @@
 import { LightningElement, track } from "lwc";
 import topFlows from "@salesforce/apex/FlowExecutionStats.topFlows";
+import PollingManager from "c/pollingManager";
 
 export default class FlowExecutionMonitor extends LightningElement {
   @track rows = [];
@@ -9,39 +10,18 @@ export default class FlowExecutionMonitor extends LightningElement {
     { label: "Faults", fieldName: "faults", type: "number" },
     { label: "Last Run", fieldName: "lastRun", type: "date" },
   ];
-  timer;
+  pollingManager = null;
 
   connectedCallback() {
+    this.pollingManager = new PollingManager(() => this.load(), 60000);
+    this.pollingManager.setupVisibilityHandling();
     this.load();
-    this.startPolling();
-    // Pause polling when tab is hidden
-    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    this.pollingManager.start();
   }
 
   disconnectedCallback() {
-    this.stopPolling();
-    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
-  }
-
-  handleVisibilityChange = () => {
-    if (document.visibilityState === "visible") {
-      this.startPolling();
-      this.load(); // Load immediately when becoming visible
-    } else {
-      this.stopPolling();
-    }
-  };
-
-  startPolling() {
-    if (!this.timer && document.visibilityState === "visible") {
-      this.timer = setInterval(() => this.load(), 60000);
-    }
-  }
-
-  stopPolling() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
+    if (this.pollingManager) {
+      this.pollingManager.cleanup();
     }
   }
 
