@@ -647,544 +647,302 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 
 
-> **Predict, prevent, and prove compliance—automatically**
+> Enterprise-grade observability and compliance guardrails for Salesforce orgs.  
+> **Outcomes:** fewer outages, faster incident triage, cleaner audits, and predictable releases.
 
-[![Salesforce API v63.0](https://img.shields.io/badge/Salesforce-v63.0-00a1e0.svg)](https://developer.salesforce.com)
-[![Lightning Web Components](https://img.shields.io/badge/LWC-Native-00a1e0.svg)](https://developer.salesforce.com/docs/component-library/documentation/en/lwc)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI Status](https://github.com/derickporter1993/Ops-Gurdian/workflows/Sentinel%20CI%2FCD/badge.svg)](https://github.com/derickporter1993/Ops-Gurdian/actions)
-
----
-
-## 🎯 What is Sentinel?
-
-Sentinel is the **first AI-native compliance intelligence platform** built entirely on Salesforce. It detects configuration drift, predicts policy violations before they happen, and generates audit-ready evidence packs—all without leaving your org's trust boundary.
-
-### The Market Opportunity
-
-**Target Customers:**
-- **14,000+ regulated nonprofits** on Salesforce.org (SOC2, HIPAA compliance required)
-- **2,300 hospitals** using Health Cloud (constant audit pressure)
-- **8,500 government contractors** needing FedRAMP compliance
-- **Single-admin teams** who can't afford Big 4 audits ($200K+)
-
-**The Problem:**
-- Manual compliance is **broken**: Admins discover violations after auditors find them
-- Config drift **happens silently**: Permission changes, flow modifications, sharing rule updates
-- Evidence collection takes **40+ hours** per audit
-- Traditional tools are **reactive**, not predictive
-
-**Sentinel's Solution:**
-- **AI-powered drift detection**: Catch risky changes in real-time
-- **Predictive compliance scoring**: Know your audit readiness before the auditor arrives
-- **One-click evidence packs**: Generate SOC2/HIPAA documentation automatically
-- **100% Salesforce-native**: Zero data egress, HIPAA/FedRAMP compliant by default
+[![Build](https://img.shields.io/github/actions/workflow/status/derickporter1993/Ops-Guardian/ci.yml?label=CI)](../../actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## 🚀 Quick Start
+## Why OpsGuardian
 
-### Prerequisites
-- Salesforce org (Developer, Sandbox, or Production)
-- Salesforce CLI (`sf` or `sfdx`)
-- Admin-level permissions
-- Node.js 18+ (for development)
+Modern Salesforce programs need **reliable telemetry** (limits, flows, APIs), **policy enforcement** (thresholds & alerts), and **production-safe automation**. OpsGuardian packages these into a **lightweight managed pattern** that you can adopt incrementally—no lock-in, no black boxes.
 
-### Installation
+**Who it's for**
 
-#### Option 1: Deploy from Source (5 minutes)
+- **Admins / Platform Owners** — prevent limit breaches, see flow failures, speed root-cause.
+- **Sec/GRC** — retention, encryption patterns, audit-ready logs & access controls.
+- **DevOps** — pre-flight checks, test coverage views, deploy health, hub-and-spoke ingest.
+
+---
+
+## Feature Highlights
+
+- **Real-time Performance Signals**: CPU/heap/SOQL/DML usage, Flow runs & faults, Async job health.
+- **Policy Thresholds**: Simple Custom Metadata (`OG_Policy__mdt`) to define warn/critical limits.
+- **Alerts & Routing**: Platform Events → Slack/Webhooks/Jira via plugin interface.
+- **Dashboards**: API usage, flow health, deployment/test insights (Lightning app).
+- **Hub-and-Spoke**: Optional REST ingest to centralize events from many orgs.
+- **Security by Default**: CRUD/FLS checks, `WITH SECURITY_ENFORCED`, Shield-friendly data model.
+- **Extensible**: Drop-in plugins; no changes to core package required.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TB
+  subgraph "Salesforce Org"
+    LWC[OpsGuardian LWCs]
+    APEX[Apex Services]
+    DATA[(OpsGuardian Data)]
+    EVENTS[Platform Events]
+    CMDT[OG_Policy__mdt]
+    LWC --> APEX
+    APEX --> DATA
+    APEX --> EVENTS
+    APEX --> CMDT
+  end
+
+subgraph "External Systems"
+  AI[AI Services]
+  SLACK[Slack/Webhooks]
+  JIRA[Jira]
+  HUB[Central Hub Org]
+end
+
+APEX -->|Named Credential| AI
+EVENTS --> SLACK
+EVENTS --> JIRA
+APEX <-. REST .-> HUB
+```
+
+---
+
+## Requirements
+
+- Salesforce API 63.0+ (tested through 65.0, Winter '26)
+- Salesforce CLI (sf), Dev Hub enabled
+- Node.js 18+ (for LWC tests/linting)
+- (Recommended) Shield Platform Encryption in production orgs
+
+---
+
+## Quick Start
+
+**A) Scratch Org (dev sandbox)**
 
 ```bash
-# 1. Clone the repository
+# 1) Authenticate Dev Hub (one time)
+sf org login web --set-default-dev-hub --alias DevHub
+
+# 2) Create a scratch org
+sf org create scratch \
+  --definition-file config/project-scratch-def.json \
+  --alias OG-Dev --duration-days 7 --set-default
+
+# 3) Deploy the project
+sf project deploy start
+
+# 4) Assign admin permset and open the org
+sf org assign permset --name Command_Center_Admin
+sf org open
+```
+
+After opening the org, use the App Launcher to pin the API Usage, Flow Execution, Deployment Job, and Performance Alert History tabs (no managed Lightning app is packaged yet).
+
+**B) Sandbox / Production**
+
+- Install the managed package (coming soon). Until then, deploy via `sf project deploy start` to a sandbox.
+- Assign `Command_Center_Admin`.
+- Configure policies under Setup → Custom Metadata Types → `OG_Policy__mdt`.
+- (Optional) Set up Named Credentials for Slack/Webhooks/AI.
+
+---
+
+## Configuration
+
+### Policy Thresholds (`OG_Policy__mdt`)
+
+| Field               | Type   | Example | Purpose                       |
+| ------------------- | ------ | ------- | ----------------------------- |
+| `CPU_Warn__c`       | Number | 5000    | CPU warn (ms)                 |
+| `CPU_Crit__c`       | Number | 8000    | CPU critical (ms)             |
+| `SOQL_Warn__c`      | Number | 80      | SOQL warn                     |
+| `SOQL_Crit__c`      | Number | 95      | SOQL critical                 |
+| `DML_Warn__c`       | Number | 120     | DML rows warn                 |
+| `DML_Crit__c`       | Number | 150     | DML rows critical             |
+| `Retention_Days__c` | Number | 180     | History retention for cleanup |
+
+Tip: create a "Default" record and org/BU-specific overrides as needed.
+
+### Alerts (Slack/Webhook)
+
+1. Setup → Named Credentials → New
+   - Name: `Slack_Webhook`
+   - URL: Incoming webhook URL
+2. Use the provided notifier (see Plugins) or your own.
+
+---
+
+## Using OpsGuardian
+
+### Dashboards (via tabs/App Launcher)
+
+- API Usage
+- Flow Health
+- System Performance
+- Deploy/Test Monitor
+- Performance Alerts
+
+### Investigate Critical Events (SOQL)
+
+```sql
+SELECT Event_Type__c, Severity__c, Message__c, Timestamp__c, Correlation_Id__c
+FROM OpsGuardian_History__c
+WHERE Severity__c = 'Critical'
+ORDER BY Timestamp__c DESC
+LIMIT 50
+```
+
+### REST Ingest (Hub-and-Spoke)
+
+- Endpoint: `/services/apexrest/og/v1/ingest`
+- Auth: JWT Bearer via Named Credential
+
+**Body**
+
+```json
+{
+  "type": "CPU",
+  "message": "CPU limit exceeded",
+  "severity": "Critical",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "correlationId": "a1b2c3d4"
+}
+```
+
+**cURL**
+
+```bash
+curl -X POST "$SF_URL/services/apexrest/og/v1/ingest" \
+  -H "Authorization: Bearer $JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"CPU","message":"CPU limit exceeded","severity":"Critical","timestamp":"2025-01-15T10:30:00Z"}'
+```
+
+Responses: 201 OK • 400 Invalid • 401 Unauthorized • 429 Rate limited (with Retry-After)
+
+---
+
+## Plugin SDK
+
+Create an outbound integration by implementing a simple interface and registering it via Custom Metadata (`OG_Plugin_Config__mdt`).
+
+```apex
+public interface OG_Plugin {
+    void send(OpsGuardian_History__c eventRec);
+    Boolean supports(String eventType, String severity);
+}
+
+public class SlackPlugin implements OG_Plugin {
+    public void send(OpsGuardian_History__c evt) {
+        HttpRequest req = new HttpRequest();
+        req.setMethod('POST');
+        req.setEndpoint('callout:Slack_Webhook');
+        req.setHeader('Content-Type', 'application/json');
+        req.setBody(JSON.serialize(evt));
+        new Http().send(req);
+    }
+    public Boolean supports(String type, String severity) {
+        return severity == 'Critical';
+    }
+}
+```
+
+Register via `OG_Plugin_Config__mdt` with `Class_Name__c = SlackPlugin`.
+
+---
+
+## Security & Compliance
+
+### STRIDE at a Glance
+
+| Threat                 | Control                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| Spoofing               | JWT validation, audience checks                         |
+| Tampering              | `WITH SECURITY_ENFORCED`, `Security.stripInaccessible`  |
+| Repudiation            | Append-only logs, correlation IDs                       |
+| Information Disclosure | CRUD/FLS, Shield encryption at rest                     |
+| DoS                    | 429 w/ Retry-After, platform cache, governor safeguards |
+| Elevation of Privilege | Least-privilege perm sets, with sharing classes         |
+
+### Data Privacy
+
+- Encryption: TLS 1.2/1.3 in transit; Shield at rest (if enabled).
+- Retention: Default 180 days (configurable).
+- Erasure: Admin-triggered anonymization Flow included.
+
+Report security issues via GitHub Security Advisories. Please do not open public issues for vulnerabilities.
+
+---
+
+## Performance (reference env)
+
+| Scenario                  | P50   | P95    | Notes                       |
+| ------------------------- | ----- | ------ | --------------------------- |
+| Ingest API (per request)  | 90ms  | 180ms  | Queueable insert            |
+| Dashboard refresh         | 600ms | 1200ms | Indexed queries + LDS cache |
+| Risk scoring (1K records) | 120ms | 250ms  | Baseline heuristic          |
+
+Test org: Enterprise Edition, ~1M history rows, ~10k events/hour.
+
+---
+
+## Development
+
+```bash
+# Clone
 git clone https://github.com/derickporter1993/Ops-Gurdian.git
 cd Ops-Gurdian
 
-# 2. Install dependencies
+# Node deps (LWC/Jest/Eslint)
 npm install
 
-# 3. Authenticate to your Salesforce org
-sfdx auth:web:login -d -a sentinel-prod
-
-# 4. Deploy Sentinel
-sfdx force:source:push -u sentinel-prod
-
-# 5. View Sentinel dashboard
-sfdx force:org:open -u sentinel-prod -p /lightning/page/home
-```
-
-#### Option 2: Create Scratch Org for Testing
-
-```bash
-# 1. Authenticate to Dev Hub
-sfdx auth:web:login -d -a DevHub
-
-# 2. Create scratch org with Sentinel
-npm run deploy:scratch
-
-# 3. Open scratch org
-sfdx force:org:open -u sentinel-scratch
-```
-
-### First-Time Setup
-
-1. **Add Components to Home Page**:
-   - Go to Setup → Edit Page (Home)
-   - Drag `sentinelReadinessScore` and `sentinelDriftPanel` onto the page
-   - Save and activate
-
-2. **Run Baseline Scan** (optional):
-```bash
-npm run evidence SOC2
-```
-
-3. **Configure Alerts** (future):
-   - Navigate to Sentinel Settings
-   - Set alert thresholds
-   - Configure Slack webhook (optional)
-
----
-
-## 📊 Core Features
-
-### 1. **Drift Detection Engine**
-**File**: `SentinelDriftDetector.cls`
-
-Automatically detects unauthorized configuration changes:
-- ✅ Permission set assignments to restricted sets
-- ✅ Sharing rule modifications
-- ✅ Flow activations without approval
-- ✅ Profile permission changes
-- ✅ Object-level security drift
-
-**How it works:**
-```apex
-// Detect drift automatically
-List<SObject> alerts = SentinelDriftDetector.detectDrift();
-
-// Example alert: "User jane.doe@company.com assigned to SystemAdmin permission set"
-```
-
-**Use Case**: Catch a junior admin granting "Modify All Data" to a contractor **before** the auditor finds it.
-
----
-
-### 2. **Compliance Readiness Score**
-**Files**: `SentinelComplianceScorer.cls`, `sentinelReadinessScore` (LWC)
-
-Calculates your org's audit readiness across 4 dimensions:
-
-| Dimension | Weight | What It Measures |
-|-----------|--------|------------------|
-| **Access Governance** | 25% | Inactive admins, permission sprawl, role hierarchy |
-| **Config Health** | 25% | Active flows, validation rules, data quality |
-| **Automation Safety** | 25% | System-mode flows, error handling, bulkification |
-| **Evidence Completeness** | 25% | Recent evidence packs, documentation currency |
-
-**Example Score Breakdown:**
-```
-Overall Score: 68/100 (Action Required)
-├── Access Governance: 55% ❌ (3 inactive admin accounts)
-├── Config Health: 80% ✅
-├── Automation Safety: 70% ⚠️ (2 flows without fault paths)
-└── Evidence: 67% ⚠️ (Last pack >30 days old)
-```
-
-**Lightning Component:**
-![Readiness Score Gauge](examples/readiness-score-screenshot.png) *(add screenshot)*
-
----
-
-### 3. **Evidence Pack Generator**
-**File**: `SentinelEvidenceEngine.cls`
-
-Generates audit-ready compliance documentation in **< 30 seconds**:
-
-```bash
-# Generate SOC2 evidence pack
-npm run evidence SOC2
-
-# Generates:
-# ├── UserAccess_SOC2_2025-01-15.csv      (User access matrix)
-# ├── RoleHierarchy_SOC2_2025-01-15.csv   (Org chart)
-# ├── PermissionSets_SOC2_2025-01-15.csv  (Active permission sets)
-# ├── Flows_SOC2_2025-01-15.csv           (Active automations)
-# └── Summary.txt                          (Evidence metadata)
-```
-
-**What Auditors Get:**
-- ✅ **User Access Matrix**: All active users, roles, profiles (SOC2 CC6.1)
-- ✅ **Role Hierarchy**: Visual org chart (SOC2 CC6.2)
-- ✅ **Permission Audit**: All custom permission sets with assignment counts
-- ✅ **Automation Inventory**: All active flows and their last-modified dates
-- ✅ **Change Log**: 90-day metadata change history (future)
-
-**Time Savings**: 40 hours of manual evidence collection → **30 seconds automated**
-
----
-
-### 4. **AI Violation Predictor**
-**File**: `SentinelAIPredictor.cls`
-
-Predicts if a change will violate compliance **before** you make it:
-
-```apex
-// Predict if change is risky
-String prediction = SentinelAIPredictor.predictViolation(
-    'Assign Modify All Data to Sales Manager profile',
-    'Profile'
-);
-
-// Returns:
-// {
-//   "isViolation": true,
-//   "confidence": 0.85,
-//   "explanation": "This change grants elevated permissions and may violate SOC2-CC6.3..."
-// }
-```
-
-**Rule-Based Logic (v1.0)**:
-- ✅ Detects "admin", "modify all", "view all" keywords
-- ✅ Flags deletion of security controls
-- ✅ Warns on bulk data exports
-- ✅ Catches system-mode flows without fault paths
-
-**Einstein AI Integration (v1.5 roadmap)**:
-- 🔲 Train model on your org's historical violations
-- 🔲 94%+ accuracy on labeled data
-- 🔲 Runs entirely within Salesforce (no external LLM calls)
-
----
-
-### 5. **Real-Time Alert Panel**
-**Files**: `SentinelAlertService.cls`, `sentinelDriftPanel` (LWC)
-
-Centralized dashboard for active compliance issues:
-
-**Example Alerts:**
-| Severity | Title | Description | Created |
-|----------|-------|-------------|---------|
-| 🔴 HIGH | Elevated Permission Assignment | User john.doe assigned to SystemAdmin | 2 hours ago |
-| 🟡 MEDIUM | Flow Modified Without Approval | Approval_Process activated without CR | 1 hour ago |
-
-**Features:**
-- ✅ Real-time updates (Platform Events)
-- ✅ One-click acknowledgment
-- ✅ Severity-based color coding
-- ✅ Audit trail of who acknowledged what
-
----
-
-## 🏗️ Architecture
-
-### Design Principles
-
-**1. Zero Data Egress**
-- All logic runs within Salesforce's trust boundary
-- No external API calls (except opt-in Slack notifications)
-- HIPAA, FedRAMP, SOC2-compliant by default
-
-**2. with sharing Everywhere**
-- All Apex classes enforce record-level security
-- No `without sharing` exceptions
-- Respects field-level security (FLS)
-
-**3. Einstein-Ready AI**
-- Rule-based predictions (v1.0)
-- Einstein Prediction Service integration (v1.5)
-- No OpenAI/external LLMs (data stays in org)
-
-**4. Audit-Trail Immutability (future)**
-- AlertLog__b (Big Object) for immutable history
-- 10-year retention for legal holds
-- Field History Tracking on all compliance objects
-
-### Technology Stack
-
-```
-┌─────────────────────────────────────────┐
-│         User Interface (Lightning)       │
-│  ┌─────────────────┬─────────────────┐  │
-│  │ Readiness Score │   Drift Panel   │  │
-│  │      (LWC)      │      (LWC)      │  │
-│  └─────────────────┴─────────────────┘  │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│          Business Logic (Apex)           │
-│  ┌──────────────────────────────────┐   │
-│  │ SentinelComplianceScorer.cls     │   │
-│  │ SentinelDriftDetector.cls        │   │
-│  │ SentinelEvidenceEngine.cls       │   │
-│  │ SentinelAIPredictor.cls          │   │
-│  └──────────────────────────────────┘   │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│        Data Layer (Custom Objects)       │
-│  ┌──────────────────────────────────┐   │
-│  │ Alert__c (standard object)       │   │
-│  │ AlertLog__b (Big Object - future)│   │
-│  │ CompliancePolicy__mdt (metadata) │   │
-│  └──────────────────────────────────┘   │
-└─────────────────────────────────────────┘
-```
-
-### Project Structure
-
-```
-sentinel/
-├── force-app/
-│   ├── main/
-│   │   ├── default/
-│   │   │   ├── classes/                      # Apex Classes
-│   │   │   │   ├── SentinelDriftDetector.cls
-│   │   │   │   ├── SentinelComplianceScorer.cls
-│   │   │   │   ├── SentinelEvidenceEngine.cls
-│   │   │   │   ├── SentinelAIPredictor.cls
-│   │   │   │   └── SentinelAlertService.cls
-│   │   │   ├── lwc/                          # Lightning Web Components
-│   │   │   │   ├── sentinelReadinessScore/
-│   │   │   │   └── sentinelDriftPanel/
-│   │   │   ├── objects/                      # Custom Objects (to be added)
-│   │   │   │   ├── Alert__c/
-│   │   │   │   └── AlertLog__b/
-│   │   │   ├── platformEvents/               # Real-time events (to be added)
-│   │   │   │   └── Sentinel_Alert_Event__e/
-│   │   │   └── permissionsets/               # Access control (to be added)
-│   │   │       └── SentinelAdmin.permissionset-meta.xml
-├── .github/
-│   └── workflows/
-│       └── sentinel-ci.yml                   # CI/CD Pipeline
-├── scripts/
-│   └── generate-evidence.sh                  # Evidence pack generator
-├── examples/
-│   └── baseline-report-sample.md             # Sample audit report
-├── package.json                              # Build scripts
-├── sfdx-project.json                         # Salesforce DX config
-└── README.md                                 # This file
-```
-
----
-
-## 🧪 Testing
-
-Sentinel follows Salesforce best practices with **75%+ code coverage** required for production.
-
-### Run All Tests
-
-```bash
-# Run Apex tests (after deployment)
-sfdx force:apex:test:run -c -r human -w 10
-
-# Expected output:
-# ✅ SentinelDriftDetector: 85% coverage
-# ✅ SentinelComplianceScorer: 80% coverage
-# ✅ SentinelEvidenceEngine: 78% coverage
-# ✅ SentinelAIPredictor: 90% coverage
-```
-
-### Test Coverage Requirements
-
-| Class | Target | Status |
-|-------|--------|--------|
-| `SentinelDriftDetector` | 75% | ⏳ In Progress |
-| `SentinelComplianceScorer` | 75% | ⏳ In Progress |
-| `SentinelEvidenceEngine` | 75% | ⏳ In Progress |
-| `SentinelAIPredictor` | 75% | ✅ Implemented (mock predictions) |
-| `SentinelAlertService` | 75% | ⏳ In Progress |
-
-**AppExchange Requirement**: 75%+ coverage for Security Review approval.
-
----
-
-## 🔐 Security & Compliance
-
-### Data Residency
-**100% of data stays within your Salesforce org.** No external storage, processing, or API calls.
-
-### Encryption (Optional)
-For HIPAA/PHI or FedRAMP environments:
-
-```bash
-# Enable Platform Encryption on sensitive fields:
-# Setup → Platform Encryption → Encrypt Fields:
-# - Alert__c.Description__c (deterministic encryption)
-```
-
-**Warning**: Only encrypt if legally required. Encryption limits search and reporting.
-
-### Permissions Model (v1.2 - To Be Added)
-
-**Permission Sets:**
-- `SentinelAdmin`: Full access (assign to compliance officers)
-- `SentinelViewer`: Read-only dashboards (assign to auditors, managers)
-- `SentinelAuditor`: Export evidence packs (assign to external auditors)
-
-### Audit Trail
-All monitoring data will be stored in:
-- **Alert__c**: Standard object with Field History Tracking
-- **AlertLog__b**: Big Object (10-year retention, immutable)
-
----
-
-## 📈 Roadmap
-
-### v1.0 (Current - MVP)
-- ✅ Drift detection (permission sets, flows)
-- ✅ Compliance readiness score
-- ✅ Evidence pack generator (CSV exports)
-- ✅ AI predictor (rule-based)
-- ✅ LWC dashboard components
-- ⏳ Custom objects (Alert__c, AlertLog__b)
-- ⏳ Platform Events for real-time alerts
-- ⏳ Permission sets
-- ⏳ Test classes (75%+ coverage)
-
-### v1.2 (Q1 2025) - Production Release
-- 🔲 Alert custom object deployment
-- 🔲 Platform Events integration
-- 🔲 Slack notifications
-- 🔲 Email notifications
-- 🔲 Configurable alert thresholds UI
-- 🔲 Permission sets (Admin, Viewer, Auditor)
-- 🔲 AppExchange Security Review submission
-
-### v1.5 (Q2 2025) - AI Insights
-- 🔲 Einstein Prediction Service integration
-- 🔲 Train model on historical violations
-- 🔲 Anomaly detection (API usage, data access patterns)
-- 🔲 Auto-remediation (revert risky changes automatically)
-- 🔲 Compliance Readiness Score with predictive trends
-
-### v2.0 (Q3 2025) - AppExchange Release
-- 🔲 Managed package
-- 🔲 Multi-org monitoring hub
-- 🔲 Big Object migration for scale
-- 🔲 FedRAMP compliance certification
-- 🔲 White-label customization
-
----
-
-## 💰 Pricing (Future)
-
-### Open Source Tier (Current)
-**Free forever** - Self-hosted, community-supported
-
-### AppExchange Tiers (Post-Security Review)
-- **Starter**: $25/user/month - Core monitoring + manual evidence
-- **Professional**: $50/user/month - + Automated evidence packs + Slack
-- **Enterprise**: $75/user/month - + AI predictions + Multi-org support
-- **Compliance Plus**: $100/user/month - + SOC2/HIPAA certification assistance + Dedicated support
-
-**Competitive Positioning:**
-- Elements.cloud: $15/user/month (metadata backup)
-- OwnBackup: $12/user/month (data recovery)
-- **Sentinel: $75/user/month (AI compliance intelligence)** ← 10x pricing power
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the Salesforce community!
-
-### Development Workflow
-
-```bash
-# 1. Fork the repo
-gh repo fork derickporter1993/Ops-Gurdian
-
-# 2. Create a feature branch
-git checkout -b feature/alert-custom-object
-
-# 3. Make changes and test
-sfdx force:source:push
-npm run fmt
+# Run tests & linters
+npm test
 npm run lint
+npm run fmt
 
-# 4. Submit PR
-gh pr create --title "Add Alert__c custom object" --body "Implements #42"
+# Apex tests & coverage
+sf apex run test --test-level RunLocalTests --code-coverage --result-format human
+
+# Static analysis
+sf scanner run --target force-app --format table
 ```
 
-### Code Standards
-- **Apex**: Use `with sharing`, check FLS/CRUD, 75%+ coverage
-- **LWC**: Follow [Lightning Base Components](https://developer.salesforce.com/docs/component-library/overview/components)
-- **Formatting**: Run `npm run fmt` before committing
-- **Linting**: Fix all `npm run lint` errors
+**Branching & Commits**
+
+- `main`: release branch
+- `dev`: integration branch
+- Feature branches: `feat/<key>-short-desc`
+- Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`…)
 
 ---
 
-## 📚 Documentation
+## Roadmap
 
-- **Salesforce DX**: https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta
-- **LWC Guide**: https://developer.salesforce.com/docs/component-library/documentation/en/lwc
-- **Einstein Platform Services**: https://developer.salesforce.com/docs/atlas.en-us.api_einstein.meta
-- **Security Review Guide**: https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta
-
----
-
-## 🐛 Troubleshooting
-
-### "No components visible in App Launcher"
-**Solution**: Add Sentinel components to Lightning page:
-```
-Setup → Edit Page → Drag sentinelReadinessScore & sentinelDriftPanel → Save
-```
-
-### "Evidence pack script fails"
-**Check**:
-1. SFDX authenticated: `sfdx force:org:list`
-2. Apex classes deployed: `sfdx force:source:status`
-3. Script permissions: `chmod +x scripts/generate-evidence.sh`
-
-### "Compliance score shows 0"
-**Cause**: Cacheable Apex methods require data.
-**Solution**: Refresh the component or perform an org action first.
+- AppExchange listing (managed package)
+- Multi-language dashboards (ES/FR/DE)
+- Anomaly detection (ML)
+- Observability exports (Grafana/Datadog)
+- Custom report builder
+- Mobile (Salesforce Mobile SDK)
 
 ---
 
-## 📄 License
+## Support
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-Built for Salesforce admins drowning in compliance requirements.
-
-**Special Thanks:**
-- Salesforce.org Trailblazer Community
-- Nonprofit Salesforce practitioners facing SOC2 audits
-- Healthcare IT teams managing HIPAA compliance
+- Bugs/requests: GitHub Issues
+- Security: Security Advisories
+- Discussions: GitHub Discussions (if enabled)
 
 ---
 
-## 📞 Support
+## License & Notices
 
-- **Issues**: https://github.com/derickporter1993/Ops-Gurdian/issues
-- **Discussions**: https://github.com/derickporter1993/Ops-Gurdian/discussions
-- **Slack**: [Coming Soon]
-- **Email**: [Coming Soon]
+MIT © Derick Brian Porter.  
+Salesforce and related marks are trademarks of salesforce.com, inc. OpsGuardian is an independent project and not an official Salesforce product.
 
 ---
-
-**🎯 The Bottom Line:**
-
-Sentinel turns compliance from a **$200K consulting engagement** into a **$9K/year software subscription**.
-
-- ✅ **For Nonprofits**: Grant-fundable compliance automation
-- ✅ **For Healthcare**: HIPAA-ready evidence in 30 seconds
-- ✅ **For Government**: FedRAMP audit preparation on demand
-- ✅ **For Solo Admins**: Your AI compliance officer, $75/month
-
-**Ready to transform compliance from reactive to predictive?**
-
-```bash
-git clone https://github.com/derickporter1993/Ops-Gurdian.git
-cd Ops-Gurdian
-sfdx force:source:push
-```
-
-**Made with ⚡ by admins who've survived SOC2 audits**

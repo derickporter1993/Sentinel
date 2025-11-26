@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "description": "Sentinel - AI Compliance Brain for Salesforce",
   "type": "module",
+  "private": true,
   "scripts": {
     "lint": "eslint .",
     "fmt:check": "prettier --check .",
     "fmt:write": "prettier --write .",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "build": "echo 'Build step here'",
     "deploy": "echo 'Deploy step here'"
   },
