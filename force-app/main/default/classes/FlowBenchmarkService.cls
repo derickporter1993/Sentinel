@@ -29,6 +29,9 @@ public with sharing class FlowBenchmarkService {
         public BenchmarkStats benchmarks;
     }
 
+    /**
+     * Wrapper class that combines a Flow execution record with its performance rating
+     */
     public class ExecutionWithRating {
         @AuraEnabled
         public Flow_Execution__c execution;
@@ -159,18 +162,7 @@ public with sharing class FlowBenchmarkService {
         for (Flow_Execution__c exec : executions) {
             ExecutionWithRating record = new ExecutionWithRating();
             record.execution = exec;
-
-            PerformanceRating perfRating = new PerformanceRating();
-            if (benchmarks != null && exec.CPU__c != null) {
-                perfRating.rating = getRating(exec.CPU__c, benchmarks);
-                perfRating.percentileRank = calculatePercentileRank(exec.CPU__c, flowName, startDate);
-                perfRating.benchmarks = benchmarks;
-            } else {
-                perfRating.rating = 'Unknown';
-                perfRating.percentileRank = null;
-            }
-            record.rating = perfRating;
-
+            record.rating = createPerformanceRating(exec, benchmarks, flowName, startDate);
             results.add(record);
         }
 
@@ -231,6 +223,24 @@ public with sharing class FlowBenchmarkService {
         } else {
             return 'Critical';
         }
+    }
+
+    private static PerformanceRating createPerformanceRating(
+        Flow_Execution__c exec,
+        BenchmarkStats benchmarks,
+        String flowName,
+        Datetime startDate
+    ) {
+        PerformanceRating perfRating = new PerformanceRating();
+        if (benchmarks != null && exec.CPU__c != null) {
+            perfRating.rating = getRating(exec.CPU__c, benchmarks);
+            perfRating.percentileRank = calculatePercentileRank(exec.CPU__c, flowName, startDate);
+            perfRating.benchmarks = benchmarks;
+        } else {
+            perfRating.rating = 'Unknown';
+            perfRating.percentileRank = null;
+        }
+        return perfRating;
     }
 
     private static String calculateFlowTrend(String flowName, Integer daysBack) {
