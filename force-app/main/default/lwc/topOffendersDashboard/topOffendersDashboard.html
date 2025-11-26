@@ -130,9 +130,9 @@
                       <div class="slds-text-heading_medium">{api.avgValue}</div>
                       <div class="slds-text-body_small">{api.percentOfLimit}% used</div>
                     </div>
-                    <div class={getTrendClass}>
+                    <div class={getTrendClass(api.trend)}>
                       <lightning-icon
-                        icon-name={getTrendIcon}
+                        icon-name={getTrendIcon(api.trend)}
                         size="x-small"
                         class="slds-m-right_xx-small"
                       ></lightning-icon>
