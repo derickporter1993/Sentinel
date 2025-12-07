@@ -10,7 +10,7 @@
 [![Salesforce API](https://img.shields.io/badge/Salesforce-v62.0+-blue.svg)](https://developer.salesforce.com)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-success.svg)](.github/workflows)
 
-[Quick Start](#quick-start) • [Sample Report](examples/compliance-baseline-report-sample.md) • [Who It's For](#who-its-for) • [Roadmap](#roadmap)
+[Quick Start](#quick-start) • [Sample Report](examples/compliance-baseline-report-sample.md) • [Who It's For](#who-its-for) • [Roadmap](#roadmap) • [Permission Intelligence PRD](docs/permission-intelligence-engine-prd.md)
 
 </div>
 
