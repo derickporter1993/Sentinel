@@ -1,4 +1,4 @@
-# Sentinel
+# Promethoeus 
 
 **The AI Compliance Brain for Salesforce — Configuration drift detection, audit evidence automation, and intelligent compliance analysis for regulated organizations.**
 
